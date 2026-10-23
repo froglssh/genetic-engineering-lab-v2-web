@@ -1225,6 +1225,18 @@ body:has(#play:not(.hidden)) .head-nav{display:none!important;}
 #play[data-chapter="2-4"][data-kind="mtx"] .fit-photo-matrix .mlb img{position:static!important;transform:none!important;width:100%!important;min-width:0!important;max-width:360px!important;height:180px!important;max-height:none!important;object-fit:contain!important}
 }
 </style>
+<style>
+/* 手機版：題幹步驟標籤改為區塊，避免文字重疊；操作圖依比例顯示 */
+@media(max-width:999px){
+#play .stepq{display:block!important;line-height:1.5!important;padding:8px 12px!important}
+#play .stepq small{display:block!important;margin:0 0 4px!important}
+}
+@media(max-width:699px){
+#play .stage{height:auto!important}
+#play svg.board{height:auto!important;min-height:0!important;flex:none!important;overflow:hidden}
+#play .read-card.used .read-placement{position:static!important;display:block;font-size:12px;padding:0;background:none}
+}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#main">跳到主要內容</a>
@@ -2401,7 +2413,7 @@ for(const b of candidates.querySelectorAll('.read-card')){const id=b.dataset.rea
 candidates.querySelector('.read-candidates').style.setProperty('--read-cols',cols);const rows=Math.ceil(pieces.length/cols),work=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--read-work-height'))||450;let maxLines=1;const cardWidth=(panel.clientWidth-20-(cols-1)*7)/cols;maxLines=0;for(const p of pieces){const name=p.label||(Array.isArray(p.cap)?p.cap.join(' · '):p.cap)||p.t||'';maxLines=Math.max(maxLines,Math.ceil(name.length*18/Math.max(50,cardWidth-12)));}const imgHeight=Math.max(pieces.length>=18?55:70,Math.min(135,(work-60-(rows-1)*7)/Math.max(1,rows)-14-Math.min(4,maxLines)*25-(maxLines?4:0)));candidates.style.setProperty('--read-img-height',imgHeight+'px');}
 function decorateBoard(){const s=current(),isDrag=s.kind==='drag'&&s.pieces?.length&&!(typeof dragDone!=='undefined'&&dragDone);grid.classList.toggle('read-drag',!!isDrag);play.dataset.readKind=STAGES[ST.idx].kind;candidates.hidden=!isDrag;if(!isDrag)return;
 board.setAttribute('viewBox',`0 0 ${s.W||600} ${Math.max(s.sceneH||300,...s.slots.map(x=>x.y+x.h/2))+6}`);board.querySelectorAll('.piece').forEach(g=>{const id=g.dataset.piece;const placed=Object.values(place).includes(id);g.style.display=placed?'':'none';g.setAttribute('tabindex','-1')});
-board.querySelectorAll('text').forEach(t=>{if(t.closest('.piece'))return;if(/托盤|TRAY/.test(t.textContent))t.style.display='none';if(!t.dataset.readFont)t.dataset.readFont=parseFloat(t.getAttribute('font-size')||getComputedStyle(t).fontSize)||14;const scale=Math.max(.3,board.getScreenCTM()?.a||1);t.setAttribute('font-size',Math.max(+t.dataset.readFont,14/scale));});
+if(innerWidth<700){const C={0:'170 50 660 258',1:'180 0 610 720'}[ST.idx];if(C){board.setAttribute('viewBox',C);if(ST.idx===1)[...board.children].forEach(e=>{if(e.tagName==='rect'&&(+e.getAttribute('x')<205||+e.getAttribute('x')>780)&&+e.getAttribute('width')<300)e.style.display='none';if(e.tagName==='text'&&/候選卡片|拖到圖上/.test(e.textContent))e.style.display='none'})}}board.querySelectorAll('text').forEach(t=>{if(t.closest('.piece'))return;if(/托盤|TRAY/.test(t.textContent))t.style.display='none';if(!t.dataset.readFont)t.dataset.readFont=parseFloat(t.getAttribute('font-size')||getComputedStyle(t).fontSize)||14;const scale=Math.max(.3,board.getScreenCTM()?.a||1);t.setAttribute('font-size',Math.max(+t.dataset.readFont,14/scale));});if(innerWidth<700){const vb=board.viewBox.baseVal;board.querySelectorAll('text').forEach(t=>{if(t.closest('.piece')||t.style.display==='none')return;let w=0;try{w=t.getBBox().width}catch(e){}if(w>vb.width*.96){t.setAttribute('font-size',(+t.getAttribute('font-size'))*vb.width*.96/w);t.setAttribute('x',vb.x+vb.width/2);t.setAttribute('text-anchor','middle')}})}
 let tags=board.querySelector('.read-slot-tags');if(tags)tags.remove();tags=document.createElementNS('http://www.w3.org/2000/svg','g');tags.setAttribute('class','read-slot-tags');tags.setAttribute('pointer-events','none');
 const scale=Math.max(.3,board.getScreenCTM()?.a||1),f=16/scale,r=11/scale;
 s.slots.forEach((x,i)=>{const g=board.querySelector(`[data-slot="${CSS.escape(x.id)}"]`);if(g){g.tabIndex=0;g.setAttribute('role','button');g.setAttribute('aria-label',`位置 ${i+1}${place[x.id]?'：'+pieceLabel(s.pieces.find(p=>p.id===place[x.id])||{}):'：空格'}，按 Enter 放置選取卡片`)}const cx=x.x-x.w/2+r,cy=x.y-x.h/2+r;const circle=document.createElementNS(tags.namespaceURI,'circle');circle.setAttribute('cx',cx);circle.setAttribute('cy',cy);circle.setAttribute('r',r);circle.setAttribute('fill','var(--accent)');const text=document.createElementNS(tags.namespaceURI,'text');text.setAttribute('x',cx);text.setAttribute('y',cy+f*.34);text.setAttribute('text-anchor','middle');text.setAttribute('font-size',f);text.setAttribute('fill','var(--accent-ink)');text.textContent=i+1;tags.append(circle,text)});board.append(tags);candidateCards(s);}
